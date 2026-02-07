@@ -1,132 +1,159 @@
-print("Добро пожаловать в универсальный калькулятор!")
-print("Выберите категорию операции:")
-print("1 - Арифметические операции")
-print("2 - Операции сравнения")
-print("3 - Логические операции")
-print("4 - Побитовые операции")
-print("5 - Операции принадлежности")
-print("6 - Операции тождественности")
+import os
 
-choice = input("Введите номер категории (1-6): ")
 
-try:
-    # Арифметические операции
-    if choice == "1":
-        a = float(input("Введите первое число: "))
-        b = float(input("Введите второе число: "))
-        op = input("Выберите оператор (+, -, *, /, //, %, **): ")
+# Класс для книги
+class Book:
+    def __init__(self, title, author):
+        self.title = title
+        self.author = author
+        self.status = "доступна"
 
-        if op == "+":
-            print("Результат:", a + b)
-        elif op == "-":
-            print("Результат:", a - b)
-        elif op == "*":
-            print("Результат:", a * b)
-        elif op == "/":
-            if b != 0:
-                print("Результат:", a / b)
+    def show_info(self):
+        return f"'{self.title}' - {self.author} ({self.status})"
+
+
+# Класс для пользователя
+class User:
+    def __init__(self, name):
+        self.name = name
+        self.books = []
+
+    def show_info(self):
+        books_count = len(self.books)
+        return f"{self.name} (книг: {books_count})"
+
+
+# Основной класс
+class Library:
+    def __init__(self):
+        self.books = []
+        self.users = []
+        self.load_data()
+
+    def load_data(self):
+        # Загружаем книги
+        if os.path.exists("books.txt"):
+            with open("books.txt", "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        data = line.split(";")
+                        if len(data) == 3:
+                            book = Book(data[0], data[1])
+                            book.status = data[2]
+                            self.books.append(book)
+
+        # Загружаем пользователей
+        if os.path.exists("users.txt"):
+            with open("users.txt", "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        data = line.split(";")
+                        if len(data) >= 1:
+                            user = User(data[0])
+                            self.users.append(user)
+
+    def save_data(self):
+        # Сохраняем книги
+        with open("books.txt", "w", encoding="utf-8") as f:
+            for book in self.books:
+                f.write(f"{book.title};{book.author};{book.status}\n")
+
+        # Сохраняем пользователей
+        with open("users.txt", "w", encoding="utf-8") as f:
+            for user in self.users:
+                f.write(f"{user.name}\n")
+
+    def add_book(self):
+        title = input("Название книги: ")
+        author = input("Автор книги: ")
+
+        new_book = Book(title, author)
+        self.books.append(new_book)
+        print(f"Книга '{title}' добавлена!")
+
+    def remove_book(self):
+        print("\nУдалить книгу")
+
+        if not self.books:
+            print("Книг нет в библиотеке")
+            return
+
+        for i, book in enumerate(self.books, 1):
+            print(f"{i}. {book.show_info()}")
+
+        try:
+            num = int(input("Номер книги для удаления: "))
+            if 1 <= num <= len(self.books):
+                removed = self.books.pop(num - 1)
+                print(f"Книга '{removed.title}' удалена!")
             else:
-                print("Ошибка: Деление на ноль")
-        elif op == "//":
-            print("Результат:", a // b)
-        elif op == "%":
-            print("Результат:", a % b)
-        elif op == "**":
-            print("Результат:", a ** b)
-        else:
-            print("Неизвестный оператор")
+                print("Неверный номер!")
+        except:
+            print("Ошибка ввода!")
 
-    # Операции сравнения
-    elif choice == "2":
-        a = float(input("Введите первое число: "))
-        b = float(input("Введите второе число: "))
-        op = input("Выберите оператор (==, !=, >, <, >=, <=): ")
+    def add_user(self):
+        print("\n--- Добавить пользователя ---")
+        name = input("Имя пользователя: ")
 
-        if op == "==":
-            print(a == b)
-        elif op == "!=":
-            print(a != b)
-        elif op == ">":
-            print(a > b)
-        elif op == "<":
-            print(a < b)
-        elif op == ">=":
-            print(a >= b)
-        elif op == "<=":
-            print(a <= b)
-        else:
-            print("Неизвестный оператор")
+        new_user = User(name)
+        self.users.append(new_user)
+        print(f"Пользователь '{name}' добавлен!")
 
-    # Логические операции
-    elif choice == "3":
-        print("Введите значения True или False")
-        a = input("Первое значение: ") == "True"
-        b = input("Второе значение: ") == "True"
-        op = input("Выберите логический оператор (and, or, not): ")
+    def show_users(self):
+        print("\nВсе пользователи")
 
-        if op == "and":
-            print("Результат:", a and b)
-        elif op == "or":
-            print("Результат:", a or b)
-        elif op == "not":
-            print("Результат:", not a)
-        else:
-            print("Неизвестный логический оператор")
+        if not self.users:
+            print("Пользователей нет")
+            return
 
-    # Побитовые операции
-    elif choice == "4":
-        a = int(input("Введите первое целое число: "))
-        op = input("Введите оператор (&, |, ^, ~, <<, >>): ")
+        for i, user in enumerate(self.users, 1):
+            print(f"{i}. {user.show_info()}")
 
-        if op in ["&", "|", "^", "<<", ">>"]:
-            b = int(input("Введите второе целое число: "))
+    def show_books(self):
+        print("\nВсе книги")
 
-        if op == "&":
-            print("Результат:", a & b)
-        elif op == "|":
-            print("Результат:", a | b)
-        elif op == "^":
-            print("Результат:", a ^ b)
-        elif op == "~":
-            print("Результат:", ~a)
-        elif op == "<<":
-            print("Результат:", a << b)
-        elif op == ">>":
-            print("Результат:", a >> b)
-        else:
-            print("Неизвестный побитовый оператор")
+        if not self.books:
+            print("Книг нет")
+            return
 
-    # Операции принадлежности
-    elif choice == "5":
-        item = input("Введите элемент: ")
-        container = input("Введите строку или список: ")
-        op = input("Выберите оператор (in, not in): ")
+        for i, book in enumerate(self.books, 1):
+            print(f"{i}. {book.show_info()}")
 
-        if "," in container:
-            container = container.split(",")  # превращаем в список
+    def start(self):
+        print("БИБЛИОТЕКА")
+        print("Вы вошли как библиотекарь")
 
-        if op == "in":
-            print(item in container)
-        elif op == "not in":
-            print(item not in container)
-        else:
-            print("Неизвестный оператор принадлежности")
+        while True:
+            print("\nМеню:")
+            print("1. Добавить книгу")
+            print("2. Удалить книгу")
+            print("3. Добавить пользователя")
+            print("4. Показать пользователей")
+            print("5. Показать книги")
+            print("0. Выход")
 
-    # Операции тождественности
-    elif choice == "6":
-        a = input("Введите первую строку: ")
-        b = input("Введите вторую строку: ")
-        op = input("Выберите оператор (is, is not): ")
+            choice = input("Выберите: ")
 
-        if op == "is":
-            print(a is b)
-        elif op == "is not":
-            print(a is not b)
-        else:
-            print("Неизвестный оператор тождественности")
+            if choice == "1":
+                self.add_book()
+            elif choice == "2":
+                self.remove_book()
+            elif choice == "3":
+                self.add_user()
+            elif choice == "4":
+                self.show_users()
+            elif choice == "5":
+                self.show_books()
+            elif choice == "0":
+                self.save_data()
+                print("Данные сохранены. До свидания!")
+                break
+            else:
+                print("Неверный выбор!")
 
-    else:
-        print("Ошибка: Неверный номер категории")
 
-except Exception as e:
-    print("Произошла ошибка:", e)
+# Создаем библиотеку и запускаем программу
+library = Library()
+library.start()
